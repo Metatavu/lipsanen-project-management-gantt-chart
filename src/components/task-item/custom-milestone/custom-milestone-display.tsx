@@ -52,8 +52,8 @@ export const CustomMilestoneDisplay = ({
     return isSelected ? styles.backgroundSelectedColor : styles.backgroundColor;
   };
 
-  const TRAINGLE_WIDTH = 25;
-  const TRAINGLE_WIDTH_WITH_OFFSET = TRAINGLE_WIDTH * 1.082;
+  const TRIANGLE_WIDTH = 25;
+  const TRIANGLE_WIDTH_WITH_OFFSET = TRIANGLE_WIDTH * 1.082;
 
   /**
    * Renders start of a bar triangle
@@ -63,7 +63,7 @@ export const CustomMilestoneDisplay = ({
   const renderLeftTriangle = (color: string) => {
     return (
       <polygon
-        points={`${x + TRAINGLE_WIDTH_WITH_OFFSET},${y} ${x},${y + height / 2} ${x + TRAINGLE_WIDTH_WITH_OFFSET},${y + height}`}
+        points={`${x + TRIANGLE_WIDTH_WITH_OFFSET},${y} ${x},${y + height / 2} ${x + TRIANGLE_WIDTH_WITH_OFFSET},${y + height}`}
         fill={color}
       />
     );
@@ -77,7 +77,7 @@ export const CustomMilestoneDisplay = ({
   const renderRightTriangle = (color: string) => {
     return (
       <polygon
-        points={`${x + width - TRAINGLE_WIDTH_WITH_OFFSET},${y} ${x + width},${y + height / 2} ${x + width - TRAINGLE_WIDTH_WITH_OFFSET},${y + height}`}
+        points={`${x + width - TRIANGLE_WIDTH_WITH_OFFSET},${y} ${x + width},${y + height / 2} ${x + width - TRIANGLE_WIDTH_WITH_OFFSET},${y + height}`}
         fill={color}
       />
     );
@@ -86,8 +86,8 @@ export const CustomMilestoneDisplay = ({
   return (
     <g onMouseDown={onMouseDown}>
       <rect
-        x={x + TRAINGLE_WIDTH}
-        width={width - 2 * TRAINGLE_WIDTH}
+        x={x + TRIANGLE_WIDTH}
+        width={width - 2 * TRIANGLE_WIDTH}
         y={y}
         height={height}
         ry={barCornerRadius}
@@ -97,8 +97,8 @@ export const CustomMilestoneDisplay = ({
         style={{ position: "relative" }}
       />
       <rect
-        x={progressX + TRAINGLE_WIDTH}
-        width={progressWidth - 2 * TRAINGLE_WIDTH}
+        x={progressX + TRIANGLE_WIDTH}
+        width={progressWidth - 2 * TRIANGLE_WIDTH}
         y={y}
         height={height}
         ry={barCornerRadius}

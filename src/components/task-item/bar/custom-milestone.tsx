@@ -15,7 +15,7 @@ export const CustomMilestone: React.FC<TaskItemProps> = ({
   isSelected,
 }) => {
   const progressPoint = getProgressPoint(
-    +!rtl * task.progressWidth + task.progressX,
+    (rtl ? 0 : 1) * task.progressWidth + task.progressX,
     task.y,
     task.height
   );

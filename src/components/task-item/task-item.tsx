@@ -122,7 +122,7 @@ export const TaskItem: React.FC<TaskItemProps> = props => {
         }
         ref={textRef}
       >
-        {task.name}
+        {task.typeInternal !== "custom-milestone" && task.name}
       </text>
     </g>
   );

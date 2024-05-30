@@ -15,6 +15,7 @@ export type TaskListProps = {
   taskListRef: React.RefObject<HTMLDivElement>;
   horizontalContainerClass?: string;
   selectedTask: BarTask | undefined;
+  taskListHidden: boolean;
   setSelectedTask: (task: string) => void;
   onExpanderClick: (task: Task) => void;
   TaskListHeader: React.FC<{
@@ -45,6 +46,7 @@ export const TaskList: React.FC<TaskListProps> = ({
   scrollY,
   tasks,
   selectedTask,
+  taskListHidden,
   setSelectedTask,
   onExpanderClick,
   locale,
@@ -79,6 +81,8 @@ export const TaskList: React.FC<TaskListProps> = ({
     setSelectedTask,
     onExpanderClick,
   };
+
+  if (taskListHidden) return null;
 
   return (
     <div ref={taskListRef}>

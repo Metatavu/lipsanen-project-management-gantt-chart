@@ -98,6 +98,23 @@ const convertToBarTask = (
         milestoneBackgroundSelectedColor
       );
       break;
+    case "custom-milestone":
+      barTask = convertToBar(
+        task,
+        index,
+        dates,
+        columnWidth,
+        rowHeight,
+        taskHeight,
+        barCornerRadius,
+        handleWidth,
+        rtl,
+        barProgressColor,
+        barProgressSelectedColor,
+        barBackgroundColor,
+        barBackgroundSelectedColor
+      );
+      break;
     case "project":
       barTask = convertToBar(
         task,

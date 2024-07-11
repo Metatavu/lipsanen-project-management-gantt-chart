@@ -26,6 +26,7 @@ import styles from "./gantt.module.css";
 
 export const Gantt: React.FunctionComponent<GanttProps> = ({
   tasks,
+  milestone,
   headerHeight = 50,
   columnWidth = 60,
   listCellWidth = "155px",
@@ -56,6 +57,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   todayColor = "rgba(252, 248, 227, 0.5)",
   viewDate,
   taskListHidden = false,
+  arrowsVisible = true,
   TooltipContent = StandardTooltipContent,
   TaskListHeader = TaskListHeaderDefault,
   TaskListTable = TaskListTableDefault,
@@ -99,13 +101,16 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   const [scrollX, setScrollX] = useState(-1);
   const [ignoreScrollEvent, setIgnoreScrollEvent] = useState(false);
 
+  // If milestone is provided, add it to the tasks as the first element
+  const tasksAndMilestone = milestone ? [milestone, ...tasks] : tasks;
+
   // task change events
   useEffect(() => {
     let filteredTasks: Task[];
     if (onExpanderClick) {
-      filteredTasks = removeHiddenTasks(tasks);
+      filteredTasks = removeHiddenTasks(tasksAndMilestone);
     } else {
-      filteredTasks = tasks;
+      filteredTasks = tasksAndMilestone;
     }
     filteredTasks = filteredTasks.sort(sortTasks);
     const [startDate, endDate] = ganttDateRange(
@@ -391,7 +396,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   const gridProps: GridProps = {
     columnWidth,
     svgWidth,
-    tasks: tasks,
+    tasks: tasksAndMilestone,
     rowHeight,
     dates: dateSetup.dates,
     todayColor,
@@ -409,6 +414,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   };
   const barProps: TaskGanttContentProps = {
     tasks: barTasks,
+    milestone: milestone && barTasks[0],
     dates: dateSetup.dates,
     ganttEvent,
     selectedTask,
@@ -416,6 +422,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
     taskHeight,
     columnWidth,
     arrowColor,
+    arrowsVisible,
     timeStep,
     fontFamily,
     fontSize,

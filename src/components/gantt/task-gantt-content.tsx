@@ -13,12 +13,14 @@ import {
 
 export type TaskGanttContentProps = {
   tasks: BarTask[];
+  milestone?: BarTask;
   dates: Date[];
   ganttEvent: GanttEvent;
   selectedTask: BarTask | undefined;
   rowHeight: number;
   columnWidth: number;
   timeStep: number;
+  arrowsVisible: boolean;
   svg?: React.RefObject<SVGSVGElement>;
   svgWidth: number;
   taskHeight: number;
@@ -34,12 +36,14 @@ export type TaskGanttContentProps = {
 
 export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
   tasks,
+  milestone,
   dates,
   ganttEvent,
   selectedTask,
   rowHeight,
   columnWidth,
   timeStep,
+  arrowsVisible,
   svg,
   taskHeight,
   arrowColor,
@@ -262,25 +266,41 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
 
   return (
     <g className="content">
-      <g className="arrows" fill={arrowColor} stroke={arrowColor}>
-        {tasks.map(task => {
-          return task.barChildren.map(child => {
-            return (
-              <Arrow
-                key={`Arrow from ${task.id} to ${tasks[child.index].id}`}
-                taskFrom={task}
-                taskTo={tasks[child.index]}
-                rowHeight={rowHeight}
-                taskHeight={taskHeight}
-                arrowIndent={arrowIndent}
-                rtl={rtl}
-              />
-            );
-          });
-        })}
-      </g>
+      {arrowsVisible && (
+        <g className="arrows" fill={arrowColor} stroke={arrowColor}>
+          {tasks.map((task) => {
+            return task.barChildren.map((child) => {
+              return (
+                <Arrow
+                  key={`Arrow from ${task.id} to ${tasks[child.index].id}`}
+                  taskFrom={task}
+                  taskTo={tasks[child.index]}
+                  rowHeight={rowHeight}
+                  taskHeight={taskHeight}
+                  arrowIndent={arrowIndent}
+                  rtl={rtl}
+                />
+              );
+            });
+          })}
+        </g>
+      )}
       <g className="bar" fontFamily={fontFamily} fontSize={fontSize}>
-        {tasks.map(task => {
+        {milestone && (
+          <TaskItem
+            task={milestone}
+            arrowIndent={arrowIndent}
+            taskHeight={taskHeight}
+            isProgressChangeable={!!onProgressChange && !milestone.isDisabled}
+            isDateChangeable={!!onDateChange && !milestone.isDisabled}
+            isDelete={!milestone.isDisabled}
+            onEventStart={handleBarEventStart}
+            key={milestone.id}
+            isSelected={!!selectedTask && milestone.id === selectedTask.id}
+            rtl={rtl}
+          />
+        )}
+        {tasks.map((task) => {
           return (
             <TaskItem
               task={task}

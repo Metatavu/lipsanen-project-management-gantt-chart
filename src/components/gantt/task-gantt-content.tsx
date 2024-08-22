@@ -268,21 +268,19 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
     <g className="content">
       {arrowsVisible && (
         <g className="arrows" fill={arrowColor} stroke={arrowColor}>
-          {tasks.map((task) => {
-            return task.barChildren.map((child) => {
-              return (
-                <Arrow
-                  key={`Arrow from ${task.id} to ${tasks[child.index].id}`}
-                  taskFrom={task}
-                  taskTo={tasks[child.index]}
-                  rowHeight={rowHeight}
-                  taskHeight={taskHeight}
-                  arrowIndent={arrowIndent}
-                  rtl={rtl}
-                />
-              );
-            });
-          })}
+          {tasks.map((task) =>
+            task.barChildren.map((child) => (
+              <Arrow
+                key={`Arrow from ${task.id} to ${tasks[child.index].id}`}
+                taskFrom={task}
+                taskTo={tasks[child.index]}
+                rowHeight={rowHeight}
+                taskHeight={taskHeight}
+                arrowIndent={arrowIndent}
+                rtl={rtl}
+              />
+            ))
+          )}
         </g>
       )}
       <g className="bar" fontFamily={fontFamily} fontSize={fontSize}>

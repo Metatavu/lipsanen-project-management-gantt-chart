@@ -116,7 +116,7 @@ export const CustomMilestoneDisplay = ({
 
   /**
    * Renders end of bar triangle
-   * or a romboid with another triangle if the milestone width is too small
+   * or a rhomboid with another triangle if the milestone width is too small
    * 
    * @param color fill color of the triangle
    */

@@ -64,7 +64,7 @@ const drownPathAndTriangle = (
       : taskTo.x1 - taskFrom.x2 + arrowIndent;
 
   const xOffset = arrowIndent; // Change this value to move the triangle to the right or left
-  const yOffset = arrowYOffset-2; // Change this value to move the triangle up or down
+  const yOffset = arrowYOffset - 2; // Change this value to move the triangle up or down
 
   const triangleHeightAdjustment = 2; // Smaller value for height adjustment
   const triangleWidthAdjustment = 3;  // Smaller value for width adjustment

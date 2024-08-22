@@ -63,6 +63,7 @@ export const CustomMilestoneDisplay = ({
   const NAME_HEIGHT = 16;
   const NAME_X = x + TRIANGLE_WIDTH/2;
   const NAME_Y = y + height / 2;
+  const MILESTONE_CENTER = x + width / 2;
 
   /**
    * Renders thin grey bar underneath the milestone
@@ -89,10 +90,22 @@ export const CustomMilestoneDisplay = ({
 
   /**
    * Renders start of a bar triangle
+   * or a romboid with another triangle if the milestone width is too small
    * 
    * @param color fill color of the triangle
    */
   const renderLeftTriangle = (color: string) => {
+    const widthWithoutTriangles = width - 2 * TRIANGLE_WIDTH;
+
+    if (widthWithoutTriangles <= 0) {
+      return (
+        <polygon
+          points={`${MILESTONE_CENTER},${y} ${MILESTONE_CENTER - TRIANGLE_WIDTH},${y + height / 2} ${MILESTONE_CENTER},${y + height}`}
+          fill={color}
+        />
+      );
+    }
+
     return (
       <polygon
         points={`${x + TRIANGLE_WIDTH_WITH_OFFSET},${y} ${x},${y + height / 2} ${x + TRIANGLE_WIDTH_WITH_OFFSET},${y + height}`}
@@ -103,10 +116,22 @@ export const CustomMilestoneDisplay = ({
 
   /**
    * Renders end of bar triangle
+   * or a rhomboid with another triangle if the milestone width is too small
    * 
    * @param color fill color of the triangle
    */
   const renderRightTriangle = (color: string) => {
+    const widthWithoutTriangles = width - 2 * TRIANGLE_WIDTH;
+
+    if (widthWithoutTriangles <= 0) {
+      return (
+        <polygon
+          points={`${MILESTONE_CENTER},${y} ${MILESTONE_CENTER + TRIANGLE_WIDTH},${y + height / 2} ${MILESTONE_CENTER},${y + height}`}
+          fill={color}
+        />
+      );
+    }
+    
     return (
       <polygon
         points={`${x + width - TRIANGLE_WIDTH_WITH_OFFSET},${y} ${x + width},${y + height / 2} ${x + width - TRIANGLE_WIDTH_WITH_OFFSET},${y + height}`}
@@ -145,7 +170,7 @@ export const CustomMilestoneDisplay = ({
    * Renders text inside the milestone shape
    */
   const renderMilestoneName = () => (
-    <foreignObject x={NAME_X} y={NAME_Y - 8} width={NAME_WIDTH} height={NAME_HEIGHT}>
+    <foreignObject x={NAME_X} y={NAME_Y - 10} width={NAME_WIDTH} height={NAME_HEIGHT} color="#fff">
       <div style={{ width: "100%", height: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "center" }}>{taskName}</div>
     </foreignObject>
   );
@@ -153,6 +178,10 @@ export const CustomMilestoneDisplay = ({
   if (width <= 0) {
     return null;
   }
+
+  const progressPercentage = progressWidth / width;
+  const adjustedWidth = width - 2 * TRIANGLE_WIDTH;
+  const adjustedProgressWidth = adjustedWidth * progressPercentage;
 
   /**
    * Main component render
@@ -163,7 +192,7 @@ export const CustomMilestoneDisplay = ({
       {/* Render milestone hex shape */}
       <rect
         x={x + TRIANGLE_WIDTH}
-        width={width - 2 * TRIANGLE_WIDTH}
+        width={adjustedWidth}
         y={y}
         height={height}
         ry={barCornerRadius}
@@ -175,7 +204,7 @@ export const CustomMilestoneDisplay = ({
       {/* Render milestone progress */}
       <rect
         x={progressX + TRIANGLE_WIDTH}
-        width={progressWidth - 2 * TRIANGLE_WIDTH}
+        width={adjustedProgressWidth}
         y={y}
         height={height}
         ry={barCornerRadius}

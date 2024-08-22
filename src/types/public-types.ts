@@ -84,6 +84,7 @@ export interface DisplayOption {
   locale?: string;
   rtl?: boolean;
   taskListHidden?: boolean;
+  arrowsVisible?: boolean;
 }
 
 export interface StylingOption {
@@ -143,4 +144,5 @@ export interface StylingOption {
 
 export interface GanttProps extends EventOption, DisplayOption, StylingOption {
   tasks: Task[];
+  milestone?: Task;
 }

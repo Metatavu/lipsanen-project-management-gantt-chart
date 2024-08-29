@@ -20,6 +20,40 @@ export const Bar: React.FC<TaskItemProps> = ({
     task.height
   );
   const handleHeight = task.height - 2;
+
+  /**
+   * Render a preview of the task when it is moved with new change preview dates
+   */
+  const renderTaskChangePreview = () => {
+    if (!task.x1ChangePreview || !task.x2ChangePreview) {
+      return null;
+    }
+
+    const previewX1 = task.x1ChangePreview;
+    const previewX2 = task.x2ChangePreview;
+    const previewProgressWidth = task.changePreviewProgressWidth;
+    const previewProgressX = task.changePreviewProgressX;
+    
+    return (
+      <BarDisplay
+        x={previewX1}
+        y={task.y}
+        width={previewX2 - previewX1}
+        height={task.height}
+        progressX={previewProgressX ?? 0}
+        progressWidth={previewProgressWidth ?? 0}
+        barCornerRadius={task.barCornerRadius}
+        styles={task.styles}
+        uniqueId={`${task.id}-preview`}
+        isSelected={isSelected}
+        onMouseDown={e => {
+          isDateChangeable && onEventStart("move", task, e);
+        }}
+        changePreviewShown
+      />
+    );
+  };
+
   return (
     <g className={styles.barWrapper} tabIndex={0}>
       <BarDisplay
@@ -73,6 +107,7 @@ export const Bar: React.FC<TaskItemProps> = ({
           />
         )}
       </g>
+      {renderTaskChangePreview()}
     </g>
   );
 };

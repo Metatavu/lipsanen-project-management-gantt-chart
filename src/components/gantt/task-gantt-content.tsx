@@ -284,20 +284,6 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
         </g>
       )}
       <g className="bar" fontFamily={fontFamily} fontSize={fontSize}>
-        {milestone && (
-          <TaskItem
-            task={milestone}
-            arrowIndent={arrowIndent}
-            taskHeight={taskHeight}
-            isProgressChangeable={!!onProgressChange && !milestone.isDisabled}
-            isDateChangeable={!!onDateChange && !milestone.isDisabled}
-            isDelete={!milestone.isDisabled}
-            onEventStart={handleBarEventStart}
-            key={milestone.id}
-            isSelected={!!selectedTask && milestone.id === selectedTask.id}
-            rtl={rtl}
-          />
-        )}
         {tasks.map((task) => {
           return (
             <TaskItem

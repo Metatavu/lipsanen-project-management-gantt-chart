@@ -31,6 +31,10 @@ export interface Task {
   dependencies?: string[];
   hideChildren?: boolean;
   displayOrder?: number;
+  changePreviewDates?: {
+    start: Date;
+    end: Date;
+  };
 }
 
 export interface EventOption {

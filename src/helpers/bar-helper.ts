@@ -170,12 +170,21 @@ const convertToBar = (
 ): BarTask => {
   let x1: number;
   let x2: number;
+
+  let x1ChangePreview: number | undefined;
+  let x2ChangePreview: number | undefined;
   if (rtl) {
     x2 = taskXCoordinateRTL(task.start, dates, columnWidth);
     x1 = taskXCoordinateRTL(task.end, dates, columnWidth);
+
+    x1ChangePreview = task.changePreviewDates ? taskXCoordinateRTL(task.changePreviewDates.start, dates, columnWidth) : undefined;
+    x2ChangePreview = task.changePreviewDates ? taskXCoordinateRTL(task.changePreviewDates.end, dates, columnWidth) : undefined;
   } else {
     x1 = taskXCoordinate(task.start, dates, columnWidth);
     x2 = taskXCoordinate(task.end, dates, columnWidth);
+
+    x1ChangePreview = task.changePreviewDates ? taskXCoordinate(task.changePreviewDates.start, dates, columnWidth) : undefined;
+    x2ChangePreview = task.changePreviewDates ? taskXCoordinate(task.changePreviewDates.end, dates, columnWidth) : undefined;
   }
   let typeInternal: TaskTypeInternal = task.type;
   if (typeInternal === "task" && x2 - x1 < handleWidth * 2) {
@@ -189,6 +198,19 @@ const convertToBar = (
     task.progress,
     rtl
   );
+
+  let changePreviewProgressWidth: number | undefined;
+  let changePreviewProgressX: number | undefined;
+
+  if (x1ChangePreview && x2ChangePreview) {
+    [changePreviewProgressWidth, changePreviewProgressX] = progressWithByParams(
+      x1ChangePreview,
+      x2ChangePreview,
+      task.progress,
+      rtl
+    );
+  }
+
   const y = taskYCoordinate(index, rowHeight, taskHeight);
   const hideChildren = task.type === "project" ? task.hideChildren : undefined;
 
@@ -214,6 +236,10 @@ const convertToBar = (
     height: taskHeight,
     barChildren: [],
     styles,
+    x1ChangePreview,
+    x2ChangePreview,
+    changePreviewProgressWidth,
+    changePreviewProgressX
   };
 };
 
@@ -260,6 +286,7 @@ const convertToMilestone = (
     hideChildren: undefined,
     barChildren: [],
     styles,
+    changePreviewDates: task.changePreviewDates
   };
 };
 

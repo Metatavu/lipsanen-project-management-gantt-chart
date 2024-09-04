@@ -37,6 +37,7 @@ export const TaskItem: React.FC<TaskItemProps> = props => {
     ...props,
   };
   const textRef = useRef<SVGTextElement>(null);
+  const { x1ChangePreview, x2ChangePreview} = task;
   const [taskItem, setTaskItem] = useState<JSX.Element>(<div />);
   const [isTextInside, setIsTextInside] = useState(true);
 
@@ -84,6 +85,26 @@ export const TaskItem: React.FC<TaskItemProps> = props => {
     }
   };
 
+  /**
+   * Renders a task preview label when change preview is available
+   */
+  const renderTaskChangePreviewLabel = () => {
+    if (!x1ChangePreview || !x2ChangePreview) {
+      return null;
+    }
+
+    return (
+      <text
+        x={x1ChangePreview + (x2ChangePreview - x1ChangePreview) * 0.5}
+        y={task.y + taskHeight * 0.5}
+        className={isTextInside ? style.barLabel : style.barLabel && style.barLabelOutside}
+        style={{opacity: 0.5}}
+      >
+        {task.name}
+      </text>
+    );
+  };
+
   return (
     <g
       onKeyDown={e => {
@@ -124,6 +145,7 @@ export const TaskItem: React.FC<TaskItemProps> = props => {
       >
         {task.typeInternal !== "custom-milestone" && task.name}
       </text>
+      {renderTaskChangePreviewLabel()}
     </g>
   );
 };

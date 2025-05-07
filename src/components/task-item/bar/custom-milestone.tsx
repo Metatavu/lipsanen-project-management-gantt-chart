@@ -1,10 +1,10 @@
 import React from "react";
 import { getProgressPoint } from "../../../helpers/bar-helper";
+import { CustomMilestoneDisplay } from "../custom-milestone/custom-milestone-display";
+import { TaskItemProps } from "../task-item";
 import { BarDateHandle } from "./bar-date-handle";
 import { BarProgressHandle } from "./bar-progress-handle";
-import { TaskItemProps } from "../task-item";
 import styles from "./bar.module.css";
-import { CustomMilestoneDisplay } from "../custom-milestone/custom-milestone-display";
 
 export const CustomMilestone: React.FC<TaskItemProps> = ({
   task,
@@ -34,7 +34,7 @@ export const CustomMilestone: React.FC<TaskItemProps> = ({
         styles={task.styles}
         isSelected={isSelected}
         onMouseDown={e => {
-          isDateChangeable && onEventStart("move", task, e);
+          isDateChangeable ? onEventStart("move", task, e) : onEventStart("click", task, e);
         }}
       />
       <g className="handleGroup">

@@ -1,12 +1,13 @@
+import { useNavigate } from "@tanstack/react-router";
 import React, { useEffect, useRef, useState } from "react";
 import { BarTask } from "../../types/bar-task";
 import { GanttContentMoveAction } from "../../types/gantt-task-actions";
 import { Bar } from "./bar/bar";
 import { BarSmall } from "./bar/bar-small";
+import { CustomMilestone } from "./bar/custom-milestone";
 import { Milestone } from "./milestone/milestone";
 import { Project } from "./project/project";
 import style from "./task-list.module.css";
-import { CustomMilestone } from "./bar/custom-milestone";
 
 export type TaskItemProps = {
   task: BarTask;
@@ -36,10 +37,30 @@ export const TaskItem: React.FC<TaskItemProps> = props => {
   } = {
     ...props,
   };
+
+  const navigate = useNavigate();
   const textRef = useRef<SVGTextElement>(null);
   const { x1ChangePreview, x2ChangePreview} = task;
   const [taskItem, setTaskItem] = useState<JSX.Element>(<div />);
   const [isTextInside, setIsTextInside] = useState(true);
+
+  const getCustomMilestone = () => {
+    const newProps = {
+      ...props,
+      onEventStart: (action: GanttContentMoveAction, selectedTask: BarTask) => {
+        if (action === "click") {
+          navigate({
+            to: "$milestoneId/tasks",
+            params: {
+              milestoneId: selectedTask.id,
+            },
+          });
+        }
+      }
+    };
+
+    return <CustomMilestone { ...newProps } />;
+  };
 
   useEffect(() => {
     switch (task.typeInternal) {
@@ -47,7 +68,7 @@ export const TaskItem: React.FC<TaskItemProps> = props => {
         setTaskItem(<Milestone {...props} />);
         break;
       case "custom-milestone":
-        setTaskItem(<CustomMilestone {...props} />);
+        setTaskItem(getCustomMilestone());
         break;
       case "project":
         setTaskItem(<Project {...props} />);

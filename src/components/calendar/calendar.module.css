@@ -29,3 +29,9 @@
   stroke: #e0e0e0;
   stroke-width: 1.4;
 }
+
+.currentWeekHighlight {
+  text-anchor: middle;
+  fill: #0079BF;
+  font-weight: 600;
+}

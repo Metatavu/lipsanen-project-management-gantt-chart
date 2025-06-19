@@ -71,13 +71,12 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const taskListRef = useRef<HTMLDivElement>(null);
+  const hasCenteredRef = useRef(false);
+
   const [dateSetup, setDateSetup] = useState<DateSetup>(() => {
     const [startDate, endDate] = ganttDateRange(tasks, viewMode, preStepsCount);
     return { viewMode, dates: seedDates(startDate, endDate, viewMode) };
   });
-  const [currentViewDate, setCurrentViewDate] = useState<Date | undefined>(
-    undefined
-  );
 
   const [taskListWidth, setTaskListWidth] = useState(0);
   const [svgContainerWidth, setSvgContainerWidth] = useState(0);
@@ -104,32 +103,28 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   // If milestone is provided, add it to the tasks as the first element
   const tasksAndMilestone = milestone ? [milestone, ...tasks] : tasks;
 
-  // task change events
+  const filteredTasks = useMemo(() => {
+    const base = onExpanderClick ? removeHiddenTasks(tasksAndMilestone) : tasksAndMilestone;
+    return base.sort(sortTasks);
+  }, [tasksAndMilestone, onExpanderClick]);
+
+  const dateRange = useMemo(() => {
+    return ganttDateRange(filteredTasks, viewMode, preStepsCount);
+  }, [filteredTasks, viewMode, preStepsCount]);
+
+  const memoizedDates = useMemo(() => {
+    const dates = seedDates(dateRange[0], dateRange[1], viewMode);
+    return rtl ? dates.reverse() : dates;
+  }, [dateRange, viewMode, rtl]);
+
+
   useEffect(() => {
-    let filteredTasks: Task[];
-    if (onExpanderClick) {
-      filteredTasks = removeHiddenTasks(tasksAndMilestone);
-    } else {
-      filteredTasks = tasksAndMilestone;
-    }
-    filteredTasks = filteredTasks.sort(sortTasks);
-    const [startDate, endDate] = ganttDateRange(
-      filteredTasks,
-      viewMode,
-      preStepsCount
-    );
-    let newDates = seedDates(startDate, endDate, viewMode);
-    if (rtl) {
-      newDates = newDates.reverse();
-      if (scrollX === -1) {
-        setScrollX(newDates.length * columnWidth);
-      }
-    }
-    setDateSetup({ dates: newDates, viewMode });
+    setDateSetup({ dates: memoizedDates, viewMode });
+
     setBarTasks(
       convertToBarTasks(
         filteredTasks,
-        newDates,
+        memoizedDates,
         columnWidth,
         rowHeight,
         taskHeight,
@@ -149,14 +144,14 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
       )
     );
   }, [
-    tasks,
-    viewMode,
-    preStepsCount,
-    rowHeight,
-    barCornerRadius,
+    memoizedDates,
+    filteredTasks,
     columnWidth,
+    rowHeight,
     taskHeight,
+    barCornerRadius,
     handleWidth,
+    rtl,
     barProgressColor,
     barProgressSelectedColor,
     barBackgroundColor,
@@ -167,38 +162,48 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
     projectBackgroundSelectedColor,
     milestoneBackgroundColor,
     milestoneBackgroundSelectedColor,
-    rtl,
-    scrollX,
-    onExpanderClick,
+    viewMode
   ]);
 
   useEffect(() => {
+    hasCenteredRef.current = false;
+  }, [viewMode]);
+
+
+  useEffect(() => {
     if (
-      viewMode === dateSetup.viewMode &&
-      ((viewDate && !currentViewDate) ||
-        (viewDate && currentViewDate?.valueOf() !== viewDate.valueOf()))
+      hasCenteredRef.current ||
+      svgContainerWidth === 0 ||
+      dateSetup.dates.length === 0
     ) {
-      const dates = dateSetup.dates;
-      const index = dates.findIndex(
-        (d, i) =>
-          viewDate.valueOf() >= d.valueOf() &&
-          i + 1 !== dates.length &&
-          viewDate.valueOf() < dates[i + 1].valueOf()
-      );
-      if (index === -1) {
-        return;
-      }
-      setCurrentViewDate(viewDate);
-      setScrollX(columnWidth * index);
+      return;
     }
+
+    const targetDate = viewDate ?? new Date();
+
+    // Find the closest date index
+    const index = dateSetup.dates.findIndex((d, i) => {
+      const current = d.getTime();
+      const next = dateSetup.dates[i + 1]?.getTime();
+      return (
+        current <= targetDate.getTime() &&
+        (!next || next > targetDate.getTime())
+      );
+    });
+
+    const scrollIndex = index !== -1 ? index : 0;
+    const centerOffset = (svgContainerWidth - columnWidth) / 2;
+    const scrollPosition = Math.max(scrollIndex * columnWidth - centerOffset, 0);
+
+    requestAnimationFrame(() => {
+      setScrollX(scrollPosition);
+      hasCenteredRef.current = true;
+    });
   }, [
     viewDate,
-    columnWidth,
+    svgContainerWidth,
     dateSetup.dates,
-    dateSetup.viewMode,
-    viewMode,
-    currentViewDate,
-    setCurrentViewDate,
+    columnWidth,
   ]);
 
   useEffect(() => {

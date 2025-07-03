@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { EventOption } from "../../types/public-types";
+import { EventOption, GanttTaskConnection } from "../../types/public-types";
 import { BarTask } from "../../types/bar-task";
 import { Arrow } from "../other/arrow";
 import { handleTaskBySVGMouseEvent } from "../../helpers/bar-helper";
@@ -13,6 +13,7 @@ import {
 
 export type TaskGanttContentProps = {
   tasks: BarTask[];
+  taskConnections?: GanttTaskConnection[];
   milestone?: BarTask;
   dates: Date[];
   ganttEvent: GanttEvent;
@@ -36,6 +37,7 @@ export type TaskGanttContentProps = {
 
 export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
   tasks,
+  taskConnections,
   milestone,
   dates,
   ganttEvent,
@@ -268,19 +270,25 @@ export const TaskGanttContent: React.FC<TaskGanttContentProps> = ({
     <g className="content">
       {arrowsVisible && (
         <g className="arrows" fill={arrowColor} stroke={arrowColor}>
-          {tasks.map((task) =>
-            task.barChildren.map((child) => (
+          {taskConnections?.map((conn) => {
+            const from = tasks.find((t) => t.id === conn.sourceTaskId);
+            const to = tasks.find((t) => t.id === conn.targetTaskId);
+            if (!from || !to) return null;
+
+            return (
               <Arrow
-                key={`Arrow from ${task.id} to ${tasks[child.index].id}`}
-                taskFrom={task}
-                taskTo={tasks[child.index]}
+                key={`Arrow-${conn.id}`}
+                taskFrom={from}
+                taskTo={to}
+                connectionType={conn.type}
                 rowHeight={rowHeight}
                 taskHeight={taskHeight}
                 arrowIndent={arrowIndent}
                 rtl={rtl}
               />
-            ))
-          )}
+            );
+          })}
+
         </g>
       )}
       <g className="bar" fontFamily={fontFamily} fontSize={fontSize}>

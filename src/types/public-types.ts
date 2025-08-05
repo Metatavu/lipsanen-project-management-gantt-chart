@@ -146,7 +146,23 @@ export interface StylingOption {
   }>;
 }
 
+export const TaskConnectionType = {
+  FinishToStart: "FINISH_TO_START",
+  StartToStart: "START_TO_START",
+  FinishToFinish: "FINISH_TO_FINISH",
+} as const;
+
+export type TaskConnectionType = typeof TaskConnectionType[keyof typeof TaskConnectionType];
+
+export type GanttTaskConnection = {
+  sourceTaskId: string;
+  targetTaskId: string;
+  type: TaskConnectionType;
+  id: string;
+};
+
 export interface GanttProps extends EventOption, DisplayOption, StylingOption {
   tasks: Task[];
   milestone?: Task;
+  taskConnections?: GanttTaskConnection[];
 }

@@ -26,6 +26,7 @@ import styles from "./gantt.module.css";
 
 export const Gantt: React.FunctionComponent<GanttProps> = ({
   tasks,
+  taskConnections,
   milestone,
   headerHeight = 50,
   columnWidth = 60,
@@ -419,6 +420,7 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   };
   const barProps: TaskGanttContentProps = {
     tasks: barTasks,
+    taskConnections,
     milestone: milestone && barTasks[0],
     dates: dateSetup.dates,
     ganttEvent,

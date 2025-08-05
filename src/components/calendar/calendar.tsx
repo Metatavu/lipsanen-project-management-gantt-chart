@@ -1,9 +1,8 @@
-import React, { ReactChild } from "react";
+import React, { ReactChild, useMemo } from "react";
 import { ViewMode } from "../../types/public-types";
 import { TopPartOfCalendar } from "./top-part-of-calendar";
 import {
   getCachedDateTimeFormat,
-  getDaysInMonth,
   getLocalDayOfWeek,
   getLocaleMonth,
   getWeekNumberISO8601,
@@ -125,15 +124,28 @@ export const Calendar: React.FC<CalendarProps> = ({
     const topValues: ReactChild[] = [];
     const bottomValues: ReactChild[] = [];
     const topDefaultHeight = headerHeight * 0.5;
+
+    const today = new Date();
+    const currentMonth = getLocaleMonth(today, locale);
+    const currentYear = today.getFullYear();
+
     for (let i = 0; i < dateSetup.dates.length; i++) {
       const date = dateSetup.dates[i];
+      const month = getLocaleMonth(date, locale);
+      const year = date.getFullYear();
+      const isCurrentMonth = month === currentMonth && year === currentYear;
+
       const bottomValue = getLocaleMonth(date, locale);
       bottomValues.push(
         <text
           key={bottomValue + date.getFullYear()}
           y={headerHeight * 0.8}
           x={columnWidth * i + columnWidth * 0.5}
-          className={styles.calendarBottomText}
+          className={
+            isCurrentMonth
+              ? `${styles.calendarBottomText} ${styles.currentWeekHighlight}`
+              : styles.calendarBottomText
+          }
         >
           {bottomValue}
         </text>
@@ -171,8 +183,17 @@ export const Calendar: React.FC<CalendarProps> = ({
     let weeksCount: number = 1;
     const topDefaultHeight = headerHeight * 0.5;
     const dates = dateSetup.dates;
+
+    const today = new Date();
+    const currentWeek = getWeekNumberISO8601(today);
+    const currentYear = today.getFullYear();
+
     for (let i = dates.length - 1; i >= 0; i--) {
       const date = dates[i];
+      const weekNumber = getWeekNumberISO8601(date);
+      const year = date.getFullYear();
+      const isCurrentWeek = weekNumber === currentWeek && year === currentYear;
+
       let topValue = "";
       if (i === 0 || date.getMonth() !== dates[i - 1].getMonth()) {
         // top
@@ -186,7 +207,11 @@ export const Calendar: React.FC<CalendarProps> = ({
           key={date.getTime()}
           y={headerHeight * 0.8}
           x={columnWidth * (i + +rtl)}
-          className={styles.calendarBottomText}
+          className={
+            isCurrentWeek
+              ? `${styles.calendarBottomText} ${styles.currentWeekHighlight}`
+              : styles.calendarBottomText
+          }
         >
           {bottomValue}
         </text>
@@ -217,48 +242,81 @@ export const Calendar: React.FC<CalendarProps> = ({
   const getCalendarValuesForDay = () => {
     const topValues: ReactChild[] = [];
     const bottomValues: ReactChild[] = [];
+
     const topDefaultHeight = headerHeight * 0.5;
+    const bottomDefaultHeight = headerHeight * 0.5;
     const dates = dateSetup.dates;
+
+    let weekStartIndex = 0;
+
+    const today = new Date();
+    const currentWeek = getWeekNumberISO8601(today);
+    const currentYear = today.getFullYear();
+
     for (let i = 0; i < dates.length; i++) {
       const date = dates[i];
-      const bottomValue = `${getLocalDayOfWeek(date, locale, "short")}, ${date
-        .getDate()
-        .toString()}`;
+      const isCurrentWeek = date.getFullYear() === currentYear && getWeekNumberISO8601(date) === currentWeek;
 
+      // Bottom row: day label
+      const bottomValue = `${getLocalDayOfWeek(date, locale, "short")}, ${date.getDate()}`;
       bottomValues.push(
         <text
-          key={date.getTime()}
-          y={headerHeight * 0.8}
+          key={`bottom-${date.getTime()}`}
+          y={topDefaultHeight + bottomDefaultHeight * 0.8}
           x={columnWidth * i + columnWidth * 0.5}
-          className={styles.calendarBottomText}
+          className={
+            isCurrentWeek
+              ? `${styles.calendarBottomText} ${styles.currentWeekHighlight}`
+              : styles.calendarBottomText
+          }
         >
           {bottomValue}
         </text>
       );
-      if (
-        i + 1 !== dates.length &&
-        date.getMonth() !== dates[i + 1].getMonth()
-      ) {
-        const topValue = getLocaleMonth(date, locale);
 
+      const isEndOfWeek =
+        i === dates.length - 1 ||
+        getWeekNumberISO8601(date) !== getWeekNumberISO8601(dates[i + 1]);
+
+      if (isEndOfWeek) {
+        const weekNumber = getWeekNumberISO8601(date);
+        const year = date.getFullYear();
+        const span = i - weekStartIndex + 1;
+        const xStart = columnWidth * weekStartIndex;
+        const xCenter = xStart + (columnWidth * span) / 2;
+
+        if (weekNumber === currentWeek && year === currentYear) {
+          // Highlight full header area for this week
+          topValues.push(
+            <rect
+              key={`highlight-week-${weekNumber}`}
+              x={xStart}
+              y={0}
+              width={columnWidth * span}
+              height={headerHeight}
+              fill="rgba(255, 247, 163, 0.6)"
+            />
+          );
+        }
+
+        // === 2. Week Label & Border ===
         topValues.push(
           <TopPartOfCalendar
-            key={topValue + date.getFullYear()}
-            value={topValue}
-            x1Line={columnWidth * (i + 1)}
+            key={`week-${weekNumber}-${year}`}
+            value={`W${weekNumber}`}
+            x1Line={xStart}
             y1Line={0}
-            y2Line={topDefaultHeight}
-            xText={
-              columnWidth * (i + 1) -
-              getDaysInMonth(date.getMonth(), date.getFullYear()) *
-                columnWidth *
-                0.5
-            }
-            yText={topDefaultHeight * 0.9}
+            y2Line={headerHeight}
+            xText={xCenter}
+            yText={topDefaultHeight * 0.8}
+            isCurrentWeek={isCurrentWeek}
           />
         );
+
+        weekStartIndex = i + 1;
       }
     }
+
     return [topValues, bottomValues];
   };
 
@@ -355,31 +413,27 @@ export const Calendar: React.FC<CalendarProps> = ({
     return [topValues, bottomValues];
   };
 
-  let topValues: ReactChild[] = [];
-  let bottomValues: ReactChild[] = [];
-  switch (dateSetup.viewMode) {
-    case ViewMode.Year:
-      [topValues, bottomValues] = getCalendarValuesForYear();
-      break;
-    case ViewMode.QuarterYear:
-      [topValues, bottomValues] = getCalendarValuesForQuarterYear();
-      break;
-    case ViewMode.Month:
-      [topValues, bottomValues] = getCalendarValuesForMonth();
-      break;
-    case ViewMode.Week:
-      [topValues, bottomValues] = getCalendarValuesForWeek();
-      break;
-    case ViewMode.Day:
-      [topValues, bottomValues] = getCalendarValuesForDay();
-      break;
-    case ViewMode.QuarterDay:
-    case ViewMode.HalfDay:
-      [topValues, bottomValues] = getCalendarValuesForPartOfDay();
-      break;
-    case ViewMode.Hour:
-      [topValues, bottomValues] = getCalendarValuesForHour();
-  }
+  const [topValues, bottomValues] = useMemo(() => {
+    switch (dateSetup.viewMode) {
+      case ViewMode.Year:
+        return getCalendarValuesForYear();
+      case ViewMode.QuarterYear:
+        return getCalendarValuesForQuarterYear();
+      case ViewMode.Month:
+        return getCalendarValuesForMonth();
+      case ViewMode.Week:
+        return getCalendarValuesForWeek();
+      case ViewMode.Day:
+        return getCalendarValuesForDay();
+      case ViewMode.QuarterDay:
+      case ViewMode.HalfDay:
+        return getCalendarValuesForPartOfDay();
+      case ViewMode.Hour:
+        return getCalendarValuesForHour();
+      default:
+        return [[], []];
+    }
+  }, [dateSetup.dates, locale, dateSetup.viewMode]);
   return (
     <g className="calendar" fontSize={fontSize} fontFamily={fontFamily}>
       <rect
@@ -389,7 +443,7 @@ export const Calendar: React.FC<CalendarProps> = ({
         height={headerHeight}
         className={styles.calendarHeader}
       />
-      {bottomValues} {topValues}
+      {topValues} {bottomValues}
     </g>
   );
 };

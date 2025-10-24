@@ -94,15 +94,15 @@ export const Gantt: React.FunctionComponent<GanttProps> = ({
   const [selectedTask, setSelectedTask] = useState<BarTask>();
   const [failedTask, setFailedTask] = useState<BarTask | null>(null);
 
-  const svgWidth = dateSetup.dates.length * columnWidth;
-  const ganttFullHeight = barTasks.length * rowHeight;
+  const svgWidth = useMemo(() => dateSetup.dates.length * columnWidth, [dateSetup.dates.length, columnWidth]);
+  const ganttFullHeight = useMemo(() => barTasks.length * rowHeight, [barTasks.length, rowHeight]);
 
   const [scrollY, setScrollY] = useState(0);
   const [scrollX, setScrollX] = useState(-1);
   const [ignoreScrollEvent, setIgnoreScrollEvent] = useState(false);
 
   // If milestone is provided, add it to the tasks as the first element
-  const tasksAndMilestone = milestone ? [milestone, ...tasks] : tasks;
+  const tasksAndMilestone = useMemo(() => milestone ? [milestone, ...tasks] : tasks, [milestone, tasks]);
 
   const filteredTasks = useMemo(() => {
     const base = onExpanderClick ? removeHiddenTasks(tasksAndMilestone) : tasksAndMilestone;

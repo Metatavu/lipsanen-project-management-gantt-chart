@@ -1,6 +1,4 @@
 import React, { ReactChild, useMemo } from "react";
-import { ViewMode } from "../../types/public-types";
-import { TopPartOfCalendar } from "./top-part-of-calendar";
 import {
   getCachedDateTimeFormat,
   getLocalDayOfWeek,
@@ -8,7 +6,9 @@ import {
   getWeekNumberISO8601,
 } from "../../helpers/date-helper";
 import { DateSetup } from "../../types/date-setup";
+import { ViewMode } from "../../types/public-types";
 import styles from "./calendar.module.css";
+import { TopPartOfCalendar } from "./top-part-of-calendar";
 
 export type CalendarProps = {
   dateSetup: DateSetup;
@@ -135,7 +135,13 @@ export const Calendar: React.FC<CalendarProps> = ({
       const year = date.getFullYear();
       const isCurrentMonth = month === currentMonth && year === currentYear;
 
-      const bottomValue = getLocaleMonth(date, locale);
+      const fullMonth = getLocaleMonth(date, locale);
+      const shortMonth =
+        locale.startsWith("fi")
+          ? fullMonth.replace(/kuu$/i, "")
+          : fullMonth;
+
+      const bottomValue = shortMonth;
       bottomValues.push(
         <text
           key={bottomValue + date.getFullYear()}
@@ -200,7 +206,7 @@ export const Calendar: React.FC<CalendarProps> = ({
         topValue = `${getLocaleMonth(date, locale)}, ${date.getFullYear()}`;
       }
       // bottom
-      const bottomValue = `W${getWeekNumberISO8601(date)}`;
+      const bottomValue = `V ${getWeekNumberISO8601(date)}`;
 
       bottomValues.push(
         <text
@@ -258,7 +264,7 @@ export const Calendar: React.FC<CalendarProps> = ({
       const isCurrentWeek = date.getFullYear() === currentYear && getWeekNumberISO8601(date) === currentWeek;
 
       // Bottom row: day label
-      const bottomValue = `${getLocalDayOfWeek(date, locale, "short")}, ${date.getDate()}`;
+      const bottomValue = `${date.getDate()}`;
       bottomValues.push(
         <text
           key={`bottom-${date.getTime()}`}
@@ -303,7 +309,7 @@ export const Calendar: React.FC<CalendarProps> = ({
         topValues.push(
           <TopPartOfCalendar
             key={`week-${weekNumber}-${year}`}
-            value={`W${weekNumber}`}
+            value={`V${weekNumber}`}
             x1Line={xStart}
             y1Line={0}
             y2Line={headerHeight}

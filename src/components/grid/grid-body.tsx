@@ -115,7 +115,7 @@ export const GridBody: React.FC<GridBodyProps> = ({
             y={0}
             width={columnWidth}
             height={y}
-            fill="##F3F3F3" 
+            fill="#F3F3F3" 
           />
         );
       }

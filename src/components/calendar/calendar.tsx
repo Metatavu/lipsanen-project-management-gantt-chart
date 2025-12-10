@@ -135,7 +135,7 @@ export const Calendar: React.FC<CalendarProps> = ({
       const year = date.getFullYear();
       const isCurrentMonth = month === currentMonth && year === currentYear;
 
-      const fullMonth = getLocaleMonth(date, locale);
+      const fullMonth = getLocaleMonth(date, locale).toLocaleLowerCase();
       const shortMonth =
         locale.startsWith("fi")
           ? fullMonth.replace(/kuu$/i, "")
@@ -203,7 +203,7 @@ export const Calendar: React.FC<CalendarProps> = ({
       let topValue = "";
       if (i === 0 || date.getMonth() !== dates[i - 1].getMonth()) {
         // top
-        topValue = `${getLocaleMonth(date, locale)}, ${date.getFullYear()}`;
+        topValue = `${getLocaleMonth(date, locale).toLocaleLowerCase()}, ${date.getFullYear()}`;
       }
       // bottom
       const bottomValue = `V ${getWeekNumberISO8601(date)}`;

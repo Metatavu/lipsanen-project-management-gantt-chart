@@ -206,7 +206,7 @@ export const Calendar: React.FC<CalendarProps> = ({
         topValue = `${getLocaleMonth(date, locale).toLocaleLowerCase()}, ${date.getFullYear()}`;
       }
       // bottom
-      const bottomValue = `V ${getWeekNumberISO8601(date)}`;
+      const bottomValue = `VK ${Number(getWeekNumberISO8601(date))}`;
 
       bottomValues.push(
         <text
@@ -309,7 +309,7 @@ export const Calendar: React.FC<CalendarProps> = ({
         topValues.push(
           <TopPartOfCalendar
             key={`week-${weekNumber}-${year}`}
-            value={`V${weekNumber}`}
+            value={`VK ${Number(weekNumber)}`}
             x1Line={xStart}
             y1Line={0}
             y2Line={headerHeight}

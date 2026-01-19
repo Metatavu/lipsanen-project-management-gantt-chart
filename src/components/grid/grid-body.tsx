@@ -1,6 +1,7 @@
+import finnishholidays, { type Holiday } from "finnish-holidays-js";
 import React, { ReactChild } from "react";
-import { Task } from "../../types/public-types";
 import { addToDate } from "../../helpers/date-helper";
+import { Task, ViewMode } from "../../types/public-types";
 import styles from "./grid.module.css";
 
 export type GridBodyProps = {
@@ -11,7 +12,39 @@ export type GridBodyProps = {
   columnWidth: number;
   todayColor: string;
   rtl: boolean;
+  viewMode?: ViewMode;
 };
+
+const isWeekend = (date: Date) => {
+  const day = date.getDay(); // 0 = Sun, 6 = Sat
+  return day === 0 || day === 6;
+};
+
+/**
+ * Builds a set of Finnish holidays in ISO format for the given date range
+ * 
+ * @param dates Date []
+ * @returns List of unique Finnish holidays in ISO format (yyyy-mm-dd) for date range
+ */
+const buildFinnishHolidaySet = (dates: Date[]) => {
+  if (!dates.length) return new Set<string>();
+
+  const firstYear = dates[0].getFullYear();
+  const lastYear = dates[dates.length - 1].getFullYear();
+  const holidayIsoSet = new Set<string>();
+
+  for (let year = firstYear; year <= lastYear; year++) {
+    const yearHolidays: Holiday[] = finnishholidays.year(year, false);
+    for (const h of yearHolidays) {
+      const d = new Date(h.year, h.month - 1, h.day);
+      const iso = d.toISOString().slice(0, 10);
+      holidayIsoSet.add(iso);
+    }
+  }
+
+  return holidayIsoSet;
+};
+
 export const GridBody: React.FC<GridBodyProps> = ({
   tasks,
   dates,
@@ -20,6 +53,7 @@ export const GridBody: React.FC<GridBodyProps> = ({
   columnWidth,
   todayColor,
   rtl,
+  viewMode
 }) => {
   let y = 0;
   const gridRows: ReactChild[] = [];
@@ -58,11 +92,35 @@ export const GridBody: React.FC<GridBodyProps> = ({
   }
 
   const now = new Date();
+
+  const finnishHolidaySet =
+    viewMode === ViewMode.Day ? buildFinnishHolidaySet(dates) : undefined;
+
   let tickX = 0;
   const ticks: ReactChild[] = [];
+  const weekendHolidayRects: ReactChild[] = [];
   let today: ReactChild = <rect />;
+
   for (let i = 0; i < dates.length; i++) {
     const date = dates[i];
+
+    if (viewMode === ViewMode.Day) {
+      const iso = date.toISOString().slice(0, 10);
+      const isHoliday = !!finnishHolidaySet?.has(iso);
+      if (isWeekend(date) || isHoliday) {
+        weekendHolidayRects.push(
+          <rect
+            key={`WH-${date.getTime()}`}
+            x={tickX}
+            y={0}
+            width={columnWidth}
+            height={y}
+            fill="#F3F3F3" 
+          />
+        );
+      }
+    }
+
     ticks.push(
       <line
         key={date.getTime()}
@@ -119,6 +177,7 @@ export const GridBody: React.FC<GridBodyProps> = ({
   return (
     <g className="gridBody">
       <g className="rows">{gridRows}</g>
+      <g className="weekendsHolidays">{weekendHolidayRects}</g>
       <g className="rowLines">{rowLines}</g>
       <g className="ticks">{ticks}</g>
       <g className="today">{today}</g>
